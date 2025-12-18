@@ -1,6 +1,18 @@
+# Environment variables
 .env
+
+# Python
 __pycache__/
-node_modules/
-*.log
-.vscode/*
+*.pyc
+*.pyo
 .venv/
+
+# Node (if ever added)
+node_modules/
+
+# Logs
+*.log
+
+# Editor / OS
+.vscode/
+.DS_Store
