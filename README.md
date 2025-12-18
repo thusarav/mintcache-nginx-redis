@@ -1,4 +1,4 @@
-# MintCache — Nginx + Redis API Gateway on Linux Mint
+# MintCache — A Nginx + Redis API Gateway on Linux Mint
 MintCache is a backend infrastructure project built on **Linux Mint** that explores how an API gateway handles **caching, rate limiting, and system observability** using **Nginx, Redis, and FastAPI**.
 
 The goal of this project was not just to make endpoints work, but to understand **real-world gateway behavior**, performance trade-offs, and infrastructure-level debugging.
