@@ -65,3 +65,48 @@ The results show a significant reduction in response time once caching is applie
 
 # Why This Project?
 This project was built to gain hands-on experience with backend infrastructure concepts that are often abstract in tutorials — focusing on how systems behave under real conditions, how trade-offs emerge, and how to debug them effectively.
+
+## Installation & Setup
+
+### Prerequisites
+Make sure you have the following installed on your system:
+
+- Docker (v20+)
+- Docker Compose (v2+)
+- Git
+
+> This project was developed and tested on Linux Mint, but should work on any OS that supports Docker.
+
+---
+
+## Clone the repository
+```bash
+git clone https://github.com/thusarav/mintcache-nginx-redis.git
+cd mintcache-nginx-redis
+
+## Start the application
+docker compose up --build
+
+## Verify services
+# Backend health check
+curl http://localhost:8080/health
+
+# Linux system metrics
+curl http://localhost:8080/mint-health
+
+# Cached slow endpoint
+curl http://localhost:8080/slow
+
+## Stop the application
+docker compose down
+
+## Optional: Run benchmarks
+# Cold cache
+for i in {1..10}; do
+  curl -o /dev/null -s -w "%{time_total}\n" http://localhost:8080/slow
+done > benchmarks/data/cold.txt
+
+# Warm cache
+for i in {1..10}; do
+  curl -o /dev/null -s -w "%{time_total}\n" http://localhost:8080/slow
+done > benchmarks/data/warm.txt
