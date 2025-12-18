@@ -1,18 +1,54 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
+import redis
 import time
 import psutil
 import platform
 
+# --------------------
+# App setup
+# --------------------
 app = FastAPI()
 
+# --------------------
+# Redis client
+# --------------------
+redis_client = redis.Redis(
+    host="redis",
+    port=6379,
+    decode_responses=True
+)
+
+# --------------------
+# Rate limit config
+# --------------------
+RATE_LIMIT = 5          # requests
+WINDOW_SECONDS = 10     # per 10 seconds
+
+
+def is_rate_limited(client_ip: str) -> bool:
+    key = f"rate:{client_ip}"
+
+    current = redis_client.incr(key)
+
+    if current == 1:
+        redis_client.expire(key, WINDOW_SECONDS)
+
+    return current > RATE_LIMIT
+
+
+# --------------------
+# Public endpoints
+# --------------------
 @app.get("/slow")
 def slow():
     time.sleep(2)
     return {"message": "Slow response"}
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.get("/mint-health")
 def mint_health():
@@ -31,3 +67,17 @@ def mint_health():
         },
         "uptime_seconds": int(time.time() - psutil.boot_time())
     }
+
+
+# --------------------
+# Internal rate-check endpoint (Nginx only)
+# --------------------
+@app.get("/_internal/rate-check")
+def rate_check(request: Request):
+    client_ip = request.client.host
+
+    if is_rate_limited(client_ip):
+        # auth_request ONLY understands 401/403
+        raise HTTPException(status_code=403, detail="Rate limit exceeded")
+
+    return {"status": "ok"}
